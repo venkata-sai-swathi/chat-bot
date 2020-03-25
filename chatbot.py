@@ -1,13 +1,18 @@
-rom ChatterBot.trainers import ListTrainer
-from ChatterBot import ChatBot
+from flask import Flask,render_template,request
+from chatterbot import ChatBot
+from chatterbot.trainers import ChatterBotCorpusTrainer
 
-bot=ChatBot('Test')
-conv=open('chats.txt','r').readlines()
+app =flask(__name__)
+english_bot=ChatBot("chatterbot",storage_adapter="chatterbot.storage.SQLStorageAdapter")
+trainer = ChatterBotCorpusTrainer(english_bot)
+trainer.train("chatterbot.corpus.english")
+@app.route("/")
+def home():
+    return render_template("index.html")
+@app.route("/get")
+def get_bot_response():
+    UserText=request.args.get('msg')
+    return str(english_bot.get_response(UserText))
 
-bot.set_trainer(ListTrainer)
-bot.train(conv)
-
-while True:
-    request=input('you :')
-    response=bot.get_response(request)
-    print('Bot :' , response)
+if __name__ == '__main__':
+    app.run()
